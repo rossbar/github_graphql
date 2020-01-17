@@ -11,7 +11,14 @@ query {
           url
           timelineItems(first:100, itemTypes:CROSS_REFERENCED_EVENT){            
             totalCount                                                          
-          }                                                                     
+          }
+          labels(first:100){
+            edges{
+              node {
+                name
+              }
+            }
+          }
         }                                                                       
       }                                                                         
     }                                                                           
