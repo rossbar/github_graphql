@@ -1,0 +1,14 @@
+query {
+  repository(owner:"networkx", name:"networkx") {
+    dependencyGraphManifests(first:100) {
+      edges {
+        node {
+          dependenciesCount
+          blobPath
+          filename
+          parseable
+        }
+      }
+    }
+  }
+}

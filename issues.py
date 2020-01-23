@@ -4,7 +4,10 @@ import json
 
 token = os.environ['GRAPH_API_KEY']
 endpoint = r'https://api.github.com/graphql'
-headers = {'Authorization': 'bearer {}'.format(token)}
+headers = {
+    'Authorization' : 'bearer {}'.format(token),
+    'Accept' : 'application/vnd.github.hawkgirl-preview+json'
+}
 
 def send_query(query_fname, cursor=None):
     """
@@ -23,6 +26,7 @@ def send_query(query_fname, cursor=None):
     # Build request payload
     payload = {'query' : ''.join(req_data.split('\n'))}
     response = requests.post(endpoint, json=payload, headers=headers)
+#    return response
     return json.loads(response.content)
 
 def get_all_responses(query_fname):
