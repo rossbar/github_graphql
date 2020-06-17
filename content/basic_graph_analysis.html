@@ -35,10 +35,6 @@
 <div class="container-xl">
 
     
-    <a class="navbar-brand" href="../index.html">
-      <img src="../_static/numpylogo.svg" class="logo" alt="logo">
-    </a>
-    
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -201,7 +197,7 @@ This is an important thing to keep in mind for the subsequent analysis.</p>
 </div>
 </div>
 <div class="section" id="number-of-cross-references-redux">
-<h2>Number of cross-references, redux<a class="headerlink" href="#number-of-cross-references-redux" title="Permalink to this headline">¶</a></h2>
+<span id="sec-degree"></span><h2>Number of cross-references, redux<a class="headerlink" href="#number-of-cross-references-redux" title="Permalink to this headline">¶</a></h2>
 <p>We can get the number of cross-references for any issue by looking at the
 <em>degree</em><a class="footnote-reference brackets" href="#degree" id="id1">1</a> of each node.
 At face value, one might expect the result to be identical to the
@@ -335,7 +331,7 @@ cross-references:</p>
 </div>
 </div>
 <div class="section" id="centrality">
-<h2>Centrality<a class="headerlink" href="#centrality" title="Permalink to this headline">¶</a></h2>
+<span id="sec-centrality"></span><h2>Centrality<a class="headerlink" href="#centrality" title="Permalink to this headline">¶</a></h2>
 <p>Now that we have constructed the graph model of the issues, we can use the
 <code class="docutils literal notranslate"><span class="pre">networkx</span></code> utilities to look at other properties of the graph.
 For example, we can compute the <em>centrality</em> for each node in the graph
