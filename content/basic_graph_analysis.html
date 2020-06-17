@@ -1,0 +1,504 @@
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Basic graph analysis &#8212; static-issues-summary  documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/mystnb.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Counting cross-references" href="edge_counting.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
+<div class="container-xl">
+
+    
+    <a class="navbar-brand" href="../index.html">
+      <img src="../_static/numpylogo.svg" class="logo" alt="logo">
+    </a>
+    
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
+      <ul id="navbar-main-elements" class="navbar-nav mr-auto">
+        
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="edge_counting.html">Counting cross-references</a>
+        </li>
+        
+        <li class="nav-item active">
+            <a class="nav-link" href="">Basic graph analysis</a>
+        </li>
+        
+        
+      </ul>
+
+
+      
+
+      <ul class="navbar-nav">
+        
+        
+      </ul>
+    </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+          <div class="col-12 col-md-3 bd-sidebar">
+
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+
+  <div class="bd-toc-item active">
+  
+
+  <ul class="nav bd-sidenav">
+      
+      
+      
+      
+        
+      
+      
+    </ul>
+
+</nav>
+          </div>
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+              
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="nav section-nav flex-column">
+    
+        <li class="nav-item toc-entry toc-h2">
+            <a href="#building-the-graph" class="nav-link">Building the graph</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h2">
+            <a href="#number-of-cross-references-redux" class="nav-link">Number of cross-references, redux</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h2">
+            <a href="#centrality" class="nav-link">Centrality</a>
+        </li>
+    
+    </ul>
+</nav>
+
+
+              
+          </div>
+          
+
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <div class="section" id="basic-graph-analysis">
+<h1>Basic graph analysis<a class="headerlink" href="#basic-graph-analysis" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="edge_counting.html"><span class="doc">previous page</span></a> demonstrated how we could derive some
+information about the <em>issue graph</em> based on the structure of the query
+itself.
+Let’s build a basic issue graph using <code class="docutils literal notranslate"><span class="pre">networkx</span></code> to see if we can derive any
+insight with a slightly more detailed analysis.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="building-the-graph">
+<h2>Building the graph<a class="headerlink" href="#building-the-graph" title="Permalink to this headline">¶</a></h2>
+<p>Let’s model the issues as an unweighted, bidirectional graph with issues as
+nodes and cross-references representing the edges.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;../../_data/issues.json&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+<span class="c1"># Create &quot;node data&quot; from the raw json</span>
+<span class="n">ndata</span> <span class="o">=</span> <span class="n">to_ndata</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="c1"># And strip the top layer of nesting from the raw json</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>In the previous example, we made no attempt to distinguish edges by <em>the
+origin of the cross-reference</em> – references from other repositories were
+treated the same as intra-repository references.
+In this analysis, we’ll focus only on intra-repository references.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+<span class="n">edges</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;timelineItems&#39;</span><span class="p">][</span><span class="s1">&#39;edges&#39;</span><span class="p">]:</span>
+        <span class="n">xref_origin</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">]</span>
+        <span class="c1"># Ignore xrefs originating from other repositories</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">xref_origin</span><span class="p">[</span><span class="s1">&#39;isCrossRepository&#39;</span><span class="p">]:</span>
+            <span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;number&#39;</span><span class="p">],</span> <span class="n">xref_origin</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">][</span><span class="s1">&#39;number&#39;</span><span class="p">])</span>
+            <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note also that we did not discriminate against <em>closed issues</em> or
+<em>pull requests</em> when compiling the list of edges.
+Thus the graph we’re building may contain edges to nodes that are <em>not</em> in
+<code class="docutils literal notranslate"><span class="pre">ndata</span></code>, which only comprises open issues.
+This is an important thing to keep in mind for the subsequent analysis.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">issue_graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+<span class="n">issue_graph</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+<span class="n">issue_graph</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="number-of-cross-references-redux">
+<h2>Number of cross-references, redux<a class="headerlink" href="#number-of-cross-references-redux" title="Permalink to this headline">¶</a></h2>
+<p>We can get the number of cross-references for any issue by looking at the
+<em>degree</em><a class="footnote-reference brackets" href="#degree" id="id1">1</a> of each node.
+At face value, one might expect the result to be identical to the
+<a class="reference internal" href="edge_counting.html#tbl-edge-count"><span class="std std-ref">edge-counting table</span></a>.
+However, this graph only counts intra-repository references, so any issues
+that were commonly linked from external repositories won’t show up here.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Limit degree calculation to nodes representing open issues</span>
+<span class="n">degree</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">issue_graph</span><span class="o">.</span><span class="n">degree</span><span class="p">(</span><span class="n">nbunch</span><span class="o">=</span><span class="n">ndata</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<span class="c1"># Sort by degree</span>
+<span class="n">degree</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">degree</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">degree</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we can look at the open issues sorted by the number of intra-respository
+cross-references:</p>
+<div class="toggle admonition">
+<p class="admonition-title">Click to show/hide table</p>
+<table class="colwidths-auto table">
+<thead>
+<tr class="row-odd"><th class="text-align:center head"><p>Iss. #</p></th>
+<th class="text-align:left head"><p>xrefs</p></th>
+<th class="text-align:left head"><p>Issue</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-align:center"><p>12525</p></td>
+<td class="text-align:left"><p>5</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/12525">Broken comparators for uint64-dtype</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>11521</p></td>
+<td class="text-align:left"><p>18</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/11521">DEP: deprecate python code with DeprecationWarning (tracking issue)</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>5353</p></td>
+<td class="text-align:left"><p>18</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/5353">object array construction should require explicitly specifying dtype=object</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>8892</p></td>
+<td class="text-align:left"><p>12</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/8892">MAINT: post <strong>array_ufunc</strong> merger to-do list</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>13105</p></td>
+<td class="text-align:left"><p>11</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/13105">ENH: Provide a way to disable flattening of 0d arrays to scalars</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>15986</p></td>
+<td class="text-align:left"><p>12</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/15986">Chain exceptions where appropriate</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>5745</p></td>
+<td class="text-align:left"><p>14</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/5745">uint64 converted silently to float64 when adding an int</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>8720</p></td>
+<td class="text-align:left"><p>11</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/8720">ENH: broadcast lstsq</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>10322</p></td>
+<td class="text-align:left"><p>10</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/10322">BUG: Inconsistent type resolution for 0d arrays</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>10736</p></td>
+<td class="text-align:left"><p>11</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/10736">Restructure percentile methods</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>5303</p></td>
+<td class="text-align:left"><p>9</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/5303">the error message for accidentally irregular arrays is confusing</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>6584</p></td>
+<td class="text-align:left"><p>8</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/6584">“setting an array element with a sequence” error could be improved.</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>9875</p></td>
+<td class="text-align:left"><p>11</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/9875">BUG: truthiness of strings is arbitrary, context-dependent, and inconsistent</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>3217</p></td>
+<td class="text-align:left"><p>8</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/3217">Merge generalized linear algebra routines into numpy.linalg</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>8987</p></td>
+<td class="text-align:left"><p>10</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/8987">BUG: Integer overflow warning applies to scalars but not arrays</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>10106</p></td>
+<td class="text-align:left"><p>6</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/10106">DOC: Add missing documentation for top-level functions</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>13114</p></td>
+<td class="text-align:left"><p>8</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/13114">DOC: missing references when using -n in sphinx-build</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>5668</p></td>
+<td class="text-align:left"><p>2</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/5668">shift operator does not work with numpy arrays with dtype=uint64</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>7370</p></td>
+<td class="text-align:left"><p>26</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/7370">Type hinting / annotation (PEP 484) for ndarray, dtype, and ufunc</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>7588</p></td>
+<td class="text-align:left"><p>5</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/7588">np.ma.masked is not a scalar</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>10614</p></td>
+<td class="text-align:left"><p>2</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/10614">The description of the <code class="docutils literal notranslate"><span class="pre">dtype</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">numpy.array</span></code> docstring</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>14778</p></td>
+<td class="text-align:left"><p>7</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/14778">API: provide examples of use of numpy random API via user stories</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>15306</p></td>
+<td class="text-align:left"><p>8</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/15306">Python 2 code clean up tracker</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>4352</p></td>
+<td class="text-align:left"><p>9</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/4352">numpy any and all applied to object arrays should return booleans.</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>8975</p></td>
+<td class="text-align:left"><p>5</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/8975">BUG: np.fmin behaves differently on object arrays</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="centrality">
+<h2>Centrality<a class="headerlink" href="#centrality" title="Permalink to this headline">¶</a></h2>
+<p>Now that we have constructed the graph model of the issues, we can use the
+<code class="docutils literal notranslate"><span class="pre">networkx</span></code> utilities to look at other properties of the graph.
+For example, we can compute the <em>centrality</em> for each node in the graph
+model.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">centrality</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">betweenness_centrality</span><span class="p">(</span><span class="n">issue_graph</span><span class="p">)</span>
+
+<span class="c1"># Sort the nodes by centrality and limit the summary to open issues</span>
+<span class="n">most_central</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">centrality</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">centrality</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ndata</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="toggle admonition">
+<p class="admonition-title">Click to show/hide table</p>
+<table class="colwidths-auto table">
+<thead>
+<tr class="row-odd"><th class="text-align:center head"><p>Iss. #</p></th>
+<th class="text-align:left head"><p>xrefs</p></th>
+<th class="text-align:left head"><p>Issue</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-align:center"><p>5353</p></td>
+<td class="text-align:left"><p>18</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/5353">object array construction should require explicitly specifying dtype=object</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>12525</p></td>
+<td class="text-align:left"><p>5</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/12525">Broken comparators for uint64-dtype</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>10614</p></td>
+<td class="text-align:left"><p>2</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/10614">The description of the <code class="docutils literal notranslate"><span class="pre">dtype</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">numpy.array</span></code> docstring</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>2533</p></td>
+<td class="text-align:left"><p>2</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/2533">uint64 modulo arithmetic broken (Trac #1940)</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>15796</p></td>
+<td class="text-align:left"><p>7</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/15796">CI: Azure Linux PyPy3 tests crash with an illegal instruction.</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>15502</p></td>
+<td class="text-align:left"><p>1</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/15502">SystemError: Exception set without being reported?</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>7267</p></td>
+<td class="text-align:left"><p>5</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/7267">can’t index string- and unicode- numpy-scalars with an empty tuple</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>12518</p></td>
+<td class="text-align:left"><p>6</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/12518">What should be the calling convention for ufunc inner loop signatures?</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>10322</p></td>
+<td class="text-align:left"><p>10</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/10322">BUG: Inconsistent type resolution for 0d arrays</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>7588</p></td>
+<td class="text-align:left"><p>5</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/7588">np.ma.masked is not a scalar</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>5745</p></td>
+<td class="text-align:left"><p>14</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/5745">uint64 converted silently to float64 when adding an int</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>8720</p></td>
+<td class="text-align:left"><p>11</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/8720">ENH: broadcast lstsq</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>9444</p></td>
+<td class="text-align:left"><p>6</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/9444"><code class="docutils literal notranslate"><span class="pre">np.errstate</span></code> is not asyncio-safe</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>7370</p></td>
+<td class="text-align:left"><p>26</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/7370">Type hinting / annotation (PEP 484) for ndarray, dtype, and ufunc</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>10179</p></td>
+<td class="text-align:left"><p>1</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/10179"><strong>contains</strong>: erroneous broadcasting when operand is a list</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>5303</p></td>
+<td class="text-align:left"><p>9</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/5303">the error message for accidentally irregular arrays is confusing</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>15411</p></td>
+<td class="text-align:left"><p>3</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/15411">BUG: nditer (and cast functions in general) do not support cast errors</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>10144</p></td>
+<td class="text-align:left"><p>2</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/10144">numpy.array gives unexpected results for generator expressions</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>10161</p></td>
+<td class="text-align:left"><p>14</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/10161">numpy.isclose vs math.isclose</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>9530</p></td>
+<td class="text-align:left"><p>4</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/9530">Feature request: <code class="docutils literal notranslate"><span class="pre">T</span></code> method for transposition applying to 1D vectors</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>6584</p></td>
+<td class="text-align:left"><p>8</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/6584">“setting an array element with a sequence” error could be improved.</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>10218</p></td>
+<td class="text-align:left"><p>2</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/10218">Comparison of arrays with iterable values fails and raises wrong warning</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>12550</p></td>
+<td class="text-align:left"><p>6</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/12550">BUG: astype(object) downcasts for datetime-dtype</a></p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:center"><p>15625</p></td>
+<td class="text-align:left"><p>0</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/15625">Construct ndarray/array from iterator/generator</a></p></td>
+</tr>
+<tr class="row-even"><td class="text-align:center"><p>3217</p></td>
+<td class="text-align:left"><p>8</p></td>
+<td class="text-align:left"><p><a class="reference external" href="https://github.com/numpy/numpy/issues/3217">Merge generalized linear algebra routines into numpy.linalg</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<dl class="footnote brackets">
+<dt class="label" id="degree"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>The degree of a node is given by the number of edges adjacent to it.</p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+    <a class='left-prev' id="prev-link" href="edge_counting.html" title="previous page">Counting cross-references</a>
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+
+    <script src="../_static/js/index.js"></script>
+    <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    <p>
+          &copy; Copyright 2020, rossbar.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
