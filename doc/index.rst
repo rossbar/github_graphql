@@ -1,18 +1,11 @@
-Welcome to static-issues-summary's documentation!
-=================================================
+A quick look at NumPy's issue tracker
+=====================================
+
+A few minimal analyses of the open issues at https://github.com/numpy/numpy
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    content/edge_counting
    content/basic_graph_analysis
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
